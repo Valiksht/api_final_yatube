@@ -55,7 +55,7 @@ class Follow(models.Model):
         User, on_delete=models.CASCADE, related_name='follower')
     following = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='follow')
-    
+
     def clean(self) -> None:
         if self.user == self.following:
             raise ValidationError('Нельза подписаться самому на себя!')
