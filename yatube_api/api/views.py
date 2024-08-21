@@ -10,6 +10,7 @@ from rest_framework.pagination import PageNumberPagination
 from posts.models import Post, Comment, Follow, Group
 from .serializers import PostSerializer, CommentSerializer
 from .serializers import FollowSerializer, GroupSerializer
+from .permissions import IsAuthorOrReadOnly
 
 User = get_user_model()
 
@@ -29,22 +30,12 @@ class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     pagination_class = LimitOffsetPagination
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly)
 
     def perform_create(self, serializer):
         serializer.save(
             author=self.request.user
         )
-
-    def perform_update(self, serializer):
-        if serializer.instance.author != self.request.user:
-            raise PermissionDenied('Изменение чужого контента запрещено!')
-        super(PostViewSet, self).perform_update(serializer)
-
-    def perform_destroy(self, serializer):
-        if serializer.author != self.request.user:
-            raise PermissionDenied('Изменение чужого контента запрещено!')
-        super(PostViewSet, self).perform_destroy(serializer)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
