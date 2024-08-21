@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.core.exceptions import ValidationError
 
 User = get_user_model()
 
@@ -54,3 +55,8 @@ class Follow(models.Model):
         User, on_delete=models.CASCADE, related_name='follower')
     following = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='follow')
+    
+    def clean(self) -> None:
+        if self.user == self.following:
+            raise ValidationError('Нельза подписаться самому на себя!')
+        return super().clean()

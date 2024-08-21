@@ -1,8 +1,8 @@
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
-from rest_framework import viewsets, permissions, filters, status
-from rest_framework.response import Response
+from rest_framework import viewsets, permissions, filters
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.permissions import AllowAny 
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.pagination import PageNumberPagination
 
@@ -14,33 +14,13 @@ from .serializers import FollowSerializer, GroupSerializer
 User = get_user_model()
 
 
-class GroupViewSet(viewsets.ModelViewSet):
+class GroupViewSet(viewsets.ReadOnlyModelViewSet):
     """Класс обрабатывающий группы."""
 
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (AllowAny,)
     pagination_class = PageNumberPagination
-
-    def create(self, request, *args, **kwargs):
-        if not request.user.is_staff:
-            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
-        return super().create(request, *args, **kwargs)
-
-    def update(self, request, *args, **kwargs):
-        if not request.user.is_staff:
-            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
-        return super().create(request, *args, **kwargs)
-
-    def partial_update(self, request, *args, **kwargs):
-        if not request.user.is_staff:
-            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
-        return super().create(request, *args, **kwargs)
-
-    def destroy(self, request, *args, **kwargs):
-        if not request.user.is_staff:
-            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
-        return super().create(request, *args, **kwargs)
 
 
 class PostViewSet(viewsets.ModelViewSet):
