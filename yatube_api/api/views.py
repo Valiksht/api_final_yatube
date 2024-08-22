@@ -1,7 +1,6 @@
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 from rest_framework import viewsets, permissions, filters, mixins
-from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import AllowAny
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.pagination import PageNumberPagination
@@ -45,7 +44,9 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (
+        permissions.IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly
+    )
 
     def get_post(self):
         post_id = self.kwargs.get('post_id')
@@ -61,18 +62,6 @@ class CommentViewSet(viewsets.ModelViewSet):
         serializer.save(
             author=self.request.user, post=post
         )
-
-    def perform_update(self, serializer):
-        post = self.get_post()
-        if serializer.instance.author != self.request.user:
-            raise PermissionDenied('Изменение чужого контента запрещено!')
-        serializer.save(author=self.request.user, post=post)
-        super(CommentViewSet, self).perform_update(serializer)
-
-    def perform_destroy(self, serializer):
-        if serializer.author != self.request.user:
-            raise PermissionDenied('Изменение чужого контента запрещено!')
-        super(CommentViewSet, self).perform_destroy(serializer)
 
 
 class FollowViewSet(
